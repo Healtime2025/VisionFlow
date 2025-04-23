@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1976d2" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" type="image/png" />
+  <title>VisionFlow</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f5f9ff;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #1976d2;
+    }
+    p {
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>👑 Welcome to VisionFlow</h1>
+  <p>Your all-in-one Project Intelligence System is live!</p>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log("✅ Service Worker registered:", reg.scope);
+        }).catch(err => {
+          console.error("❌ Service Worker failed:", err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
 
