@@ -1,36 +1,139 @@
-<script>
-  const scriptURL = "https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec";
-  const form = document.getElementById("projectForm");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Project – VisionFlow</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f5f9ff;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1976d2;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    nav {
+      background: #e3e9f5;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #1976d2;
+      font-weight: bold;
+    }
+    form {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #145a9e;
+    }
+  </style>
+</head>
+<body>
+  <header>📁 Add Project</header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tasks.html">Submit Task</a>
+    <a href="projects.html">Add Project</a>
+  </nav>
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  <form id="projectForm">
+    <label>Project Name</label>
+    <input type="text" name="name" required />
 
-    const project = {
-      name: form["name"].value,
-      start: form["start"].value,
-      end: form["end"].value,
-      owner: form["owner"].value,
-      status: form["status"].value,
-      budget: form["budget"].value,
-      description: form["description"].value
-    };
+    <label>Start Date</label>
+    <input type="date" name="start" required />
 
-    fetch(scriptURL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    project: project   // OR task: task
-  })
-})
-    .then(res => res.text())
-    .then(data => {
-      alert("✅ Project submitted: " + data);
-      form.reset();
-    })
-    .catch(err => {
-      alert("❌ Error submitting project: " + err.message);
+    <label>End Date</label>
+    <input type="date" name="end" />
+
+    <label>Project Owner</label>
+    <input type="text" name="owner" required />
+
+    <label>Status</label>
+    <select name="status" required>
+      <option value="Active">Active</option>
+      <option value="Pending">Pending</option>
+      <option value="Completed">Completed</option>
+    </select>
+
+    <label>Budget</label>
+    <input type="number" name="budget" />
+
+    <label>Description</label>
+    <textarea name="description" rows="4"></textarea>
+
+    <button type="submit">Add Project</button>
+  </form>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec";
+    const form = document.getElementById("projectForm");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const project = {
+        name: form["name"].value,
+        start: form["start"].value,
+        end: form["end"].value,
+        owner: form["owner"].value,
+        status: form["status"].value,
+        budget: form["budget"].value,
+        description: form["description"].value
+      };
+
+      fetch(scriptURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ project: project })
+      })
+      .then(res => res.text())
+      .then(data => {
+        alert("✅ Project submitted: " + data);
+        form.reset();
+      })
+      .catch(err => {
+        alert("❌ Error submitting project: " + err.message);
+      });
     });
-  });
-</script>
+  </script>
+</body>
+</html>
