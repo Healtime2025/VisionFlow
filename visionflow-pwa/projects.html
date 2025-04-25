@@ -74,29 +74,30 @@
 
   <form id="projectForm">
     <label>Project Name</label>
-    <input type="text" name="name" required />
+    <input type="text" name="Project Name" required />
 
     <label>Start Date</label>
-    <input type="date" name="start" required />
+    <input type="date" name="Start Date" required />
 
     <label>End Date</label>
-    <input type="date" name="end" />
+    <input type="date" name="End Date" />
 
     <label>Project Owner</label>
-    <input type="email" name="owner" required />
+    <input type="email" name="Project Owner" required />
 
     <label>Status</label>
-    <select name="status" required>
+    <select name="Status" required>
       <option>Active</option>
       <option>Pending</option>
       <option>Completed</option>
+      <option>Paused</option>
     </select>
 
     <label>Budget</label>
-    <input type="number" name="budget" />
+    <input type="number" name="Budget" />
 
     <label>Description</label>
-    <textarea name="description" rows="4"></textarea>
+    <textarea name="Description" rows="4"></textarea>
 
     <button type="submit">Add Project</button>
   </form>
@@ -107,15 +108,7 @@
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-
-      const formData = new FormData();
-      formData.append("Project Name", form.elements["name"].value);
-      formData.append("Start Date", form.elements["start"].value);
-      formData.append("End Date", form.elements["end"].value);
-      formData.append("Project Owner", form.elements["owner"].value);
-      formData.append("Status", form.elements["status"].value);
-      formData.append("Budget", form.elements["budget"].value);
-      formData.append("Description", form.elements["description"].value);
+      const formData = new FormData(form);
 
       fetch(scriptURL, {
         method: "POST",
