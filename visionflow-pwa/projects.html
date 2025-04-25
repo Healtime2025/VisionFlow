@@ -74,30 +74,30 @@
 
   <form id="projectForm">
     <label>Project Name</label>
-    <input type="text" name="Project Name" required />
+    <input type="text" name="name" required />
 
     <label>Start Date</label>
-    <input type="date" name="Start Date" required />
+    <input type="date" name="start" required />
 
     <label>End Date</label>
-    <input type="date" name="End Date" />
+    <input type="date" name="end" />
 
     <label>Project Owner</label>
-    <input type="email" name="Project Owner" required />
+    <input type="email" name="owner" required />
 
     <label>Status</label>
-    <select name="Status" required>
-      <option>Active</option>
-      <option>Pending</option>
-      <option>Completed</option>
-      <option>Paused</option>
+    <select name="status" required>
+      <option value="Active">✅ Active</option>
+      <option value="Planning">🧠 Planning</option>
+      <option value="Paused">⏸️ Paused</option>
+      <option value="Completed">🏁 Completed</option>
     </select>
 
     <label>Budget</label>
-    <input type="number" name="Budget" />
+    <input type="number" name="budget" />
 
     <label>Description</label>
-    <textarea name="Description" rows="4"></textarea>
+    <textarea name="description" rows="4"></textarea>
 
     <button type="submit">Add Project</button>
   </form>
@@ -110,14 +110,20 @@
       e.preventDefault();
 
       const formData = new FormData(form);
+      const projectPayload = {
+        project: Object.fromEntries(formData.entries())
+      };
 
       fetch(scriptURL, {
         method: "POST",
-        body: formData
+        body: JSON.stringify(projectPayload),
+        headers: {
+          "Content-Type": "application/json"
+        }
       })
       .then(response => response.text())
       .then(data => {
-        alert("✅ Project submitted successfully!");
+        alert(data || "✅ Project submitted successfully!");
         form.reset();
       })
       .catch(error => {
@@ -127,5 +133,3 @@
   </script>
 </body>
 </html>
-
-
