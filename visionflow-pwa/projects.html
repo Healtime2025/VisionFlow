@@ -1,129 +1,113 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Project – VisionFlow</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f9ff;
-      margin: 0;
-      padding: 0;
+/** VisionFlow: Unified Project & Task Intelligence System */
+
+const SHEET_ID = "19sZNEU5TXx5yPLH_qyDaQusGbKIWx90K_IN7b5fm3cg";
+const DASHBOARD_SHEET = "Dashboard";
+const TASKS_SHEET = "Tasks";
+const ARCHIVE_SHEET = "ClosedProjects";
+const PROJECTS_SHEET = "Projects";
+const ADMIN_EMAIL = "visionflowintel@gmail.com";
+
+function doGet(e) {
+  const page = (e && e.parameter && e.parameter.page) || "UnifiedForm";
+  return HtmlService.createHtmlOutputFromFile(page).setTitle("VisionFlow");
+}
+
+function getProjectList() {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(PROJECTS_SHEET);
+    const values = sheet.getRange(2, 1, sheet.getLastRow() - 1).getValues().flat();
+    return values.filter(p => p);
+  } catch (err) {
+    Logger.log("Error in getProjectList: " + err.message);
+    throw new Error("Failed to load project list.");
+  }
+}
+
+function addTask(taskObj) {
+  try {
+    if (!taskObj.project || !taskObj.task || !taskObj.owner || !taskObj.dueDate) {
+      throw new Error("Task section incomplete. Please fill all required task fields.");
     }
-    header {
-      background: #1976d2;
-      color: white;
-      padding: 15px;
-      text-align: center;
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TASKS_SHEET);
+    sheet.appendRow([
+      new Date(),
+      taskObj.project.trim(),
+      taskObj.task.trim(),
+      taskObj.owner.trim(),
+      new Date(taskObj.dueDate),
+      "Open",
+      taskObj.priority || "Normal",
+      taskObj.notes || "",
+      taskObj.type || "General"
+    ]);
+    updateDashboard();
+    syncProjectsFromTasks();
+    sendTaskNotification(taskObj);
+    return "✅ Task added.";
+  } catch (err) {
+    Logger.log("Error in addTask: " + err.message);
+    throw new Error("Task submission failed: " + err.message);
+  }
+}
+
+function addNewProject(project) {
+  try {
+    if (!project.name || !project.owner || !project.start) {
+      throw new Error("Project section incomplete. Please fill all required project fields.");
     }
-    nav {
-      background: #e3e9f5;
-      padding: 10px;
-      text-align: center;
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(PROJECTS_SHEET);
+    const cleanStart = new Date(project.start);
+    const cleanEnd = project.end ? new Date(project.end) : "";
+    const startDate = new Date(cleanStart.getFullYear(), cleanStart.getMonth(), cleanStart.getDate());
+    const endDate = cleanEnd ? new Date(cleanEnd.getFullYear(), cleanEnd.getMonth(), cleanEnd.getDate()) : "";
+    sheet.appendRow([
+      project.name.trim(),
+      startDate,
+      endDate,
+      project.owner.trim(),
+      project.status || "Active",
+      project.budget || "",
+      project.description || "",
+      new Date()
+    ]);
+    return "✅ Project added.";
+  } catch (err) {
+    Logger.log("Error in addNewProject: " + err.message);
+    throw new Error("Project submission failed: " + err.message);
+  }
+}
+
+function doPost(e) {
+  try {
+    if (e.postData && e.postData.contents && e.postData.type === "application/json") {
+      const data = JSON.parse(e.postData.contents);
+      if (data.project) {
+        return ContentService.createTextOutput(addNewProject(data.project)).setMimeType(ContentService.MimeType.TEXT);
+      }
+      if (data.task) {
+        return ContentService.createTextOutput(addTask(data.task)).setMimeType(ContentService.MimeType.TEXT);
+      }
     }
-    nav a {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #1976d2;
-      font-weight: bold;
+
+    const pName = e.parameter["Project Name"];
+    const pOwner = e.parameter["Project Owner"];
+    const pStart = e.parameter["Start Date"];
+
+    if (pName && pOwner && pStart) {
+      const project = {
+        name: pName,
+        start: pStart,
+        end: e.parameter["End Date"],
+        owner: pOwner,
+        status: e.parameter["Status"],
+        budget: e.parameter["Budget"],
+        description: e.parameter["Description"]
+      };
+      return ContentService.createTextOutput(addNewProject(project)).setMimeType(ContentService.MimeType.TEXT);
     }
-    form {
-      max-width: 600px;
-      margin: 30px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px 25px;
-      background-color: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #145a9e;
-    }
-  </style>
-</head>
-<body>
-  <header>📁 Add Project</header>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="tasks.html">Submit Task</a>
-    <a href="projects.html">Add Project</a>
-  </nav>
 
-  <form id="projectForm">
-    <label>Project Name</label>
-    <input type="text" name="Project Name" required />
-
-    <label>Start Date</label>
-    <input type="date" name="Start Date" required />
-
-    <label>End Date</label>
-    <input type="date" name="End Date" />
-
-    <label>Project Owner</label>
-    <input type="email" name="Project Owner" required />
-
-    <label>Status</label>
-    <select name="Status" required>
-      <option>Active</option>
-      <option>Planning</option>
-      <option>Completed</option>
-      <option>Paused</option>
-    </select>
-
-    <label>Budget</label>
-    <input type="number" name="Budget" placeholder="ZAR" />
-
-    <label>Description</label>
-    <textarea name="Description" rows="4" placeholder="Brief description of the project..."></textarea>
-
-    <button type="submit">➕ Add Project</button>
-  </form>
-
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec";
-    const form = document.getElementById("projectForm");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-
-      fetch(scriptURL, {
-        method: "POST",
-        body: formData,
-      })
-      .then(response => response.text())
-      .then(data => {
-        alert("✅ " + data);
-        form.reset();
-      })
-      .catch(error => {
-        alert("❌ Submission failed: " + error.message);
-      });
-    });
-  </script>
-</body>
-</html>
+    return ContentService.createTextOutput("❌ Error: No valid task or project payload").setMimeType(ContentService.MimeType.TEXT);
+  } catch (err) {
+    return ContentService.createTextOutput("❌ Error: " + err.message).setMimeType(ContentService.MimeType.TEXT);
+  }
+}  
