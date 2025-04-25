@@ -69,6 +69,7 @@
     <a href="index.html">Home</a>
     <a href="dashboard.html">Dashboard</a>
     <a href="tasks.html">Submit Task</a>
+    <a href="projects.html">Add Project</a>
   </nav>
 
   <form id="taskForm">
@@ -112,9 +113,8 @@
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const formData = new FormData(form);
 
-      // Wrap task object to match Apps Script doPost structure
+      const formData = new FormData(form);
       const taskPayload = {
         task: Object.fromEntries(formData.entries())
       };
@@ -128,7 +128,7 @@
       })
       .then(res => res.text())
       .then(data => {
-        alert("✅ Task submitted successfully!");
+        alert(data || "✅ Task submitted successfully!");
         form.reset();
       })
       .catch(err => {
@@ -138,4 +138,3 @@
   </script>
 </body>
 </html>
-
