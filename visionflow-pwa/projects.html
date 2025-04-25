@@ -102,32 +102,28 @@
   </form>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec";
     const form = document.getElementById("projectForm");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
 
-      const project = {
-        name: form.elements["name"].value,
-        start: form.elements["start"].value,
-        end: form.elements["end"].value,
-        owner: form.elements["owner"].value,
-        status: form.elements["status"].value,
-        budget: form.elements["budget"].value,
-        description: form.elements["description"].value
-      };
+      const formData = new FormData();
+      formData.append("Project Name", form.elements["name"].value);
+      formData.append("Start Date", form.elements["start"].value);
+      formData.append("End Date", form.elements["end"].value);
+      formData.append("Project Owner", form.elements["owner"].value);
+      formData.append("Status", form.elements["status"].value);
+      formData.append("Budget", form.elements["budget"].value);
+      formData.append("Description", form.elements["description"].value);
 
       fetch(scriptURL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ project })
+        body: formData
       })
-      .then(response => response.text())
+      .then(res => res.text())
       .then(data => {
-        alert("✅ Project submitted successfully!\n" + data);
+        alert("✅ Project submitted successfully!");
         form.reset();
       })
       .catch(err => {
