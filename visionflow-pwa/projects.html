@@ -1,254 +1,137 @@
-// VisionFlow: Unified Project & Task Intelligence System
-// Connected to: https://docs.google.com/spreadsheets/d/19sZNEU5TXx5yPLH_qyDaQusGbKIWx90K_IN7b5fm3cg
-
-const SHEET_ID = "19sZNEU5TXx5yPLH_qyDaQusGbKIWx90K_IN7b5fm3cg";
-const DASHBOARD_SHEET = "Dashboard";
-const TASKS_SHEET = "Tasks";
-const ARCHIVE_SHEET = "ClosedProjects";
-const PROJECTS_SHEET = "Projects";
-const ADMIN_EMAIL = "visionflowintel@gmail.com";
-
-/** Serve Unified Form Web Interface */
-function doGet(e) {
-  const page = (e && e.parameter && e.parameter.page) || "UnifiedForm";
-  return HtmlService.createHtmlOutputFromFile(page).setTitle("VisionFlow");
-}
-
-/** Provide project list for dropdown */
-function getProjectList() {
-  try {
-    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(PROJECTS_SHEET);
-    const values = sheet.getRange(2, 1, sheet.getLastRow() - 1).getValues().flat();
-    return values.filter(p => p);
-  } catch (err) {
-    Logger.log("Error in getProjectList: " + err.message);
-    throw new Error("Failed to load project list.");
-  }
-}
-
-/** Add new task */
-function addTask(taskObj) {
-  try {
-    if (!taskObj.project || !taskObj.task || !taskObj.owner || !taskObj.dueDate) {
-      throw new Error("Task section incomplete. Please fill all required task fields.");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Project – VisionFlow</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f5f9ff;
+      margin: 0;
+      padding: 0;
     }
-    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TASKS_SHEET);
-    sheet.appendRow([
-      new Date(),
-      taskObj.project.trim(),
-      taskObj.task.trim(),
-      taskObj.owner.trim(),
-      new Date(taskObj.dueDate),
-      "Open",
-      taskObj.priority || "Normal",
-      taskObj.notes || "",
-      taskObj.type || "General"
-    ]);
-    updateDashboard();
-    syncProjectsFromTasks();
-    sendTaskNotification(taskObj);
-    return "✅ Task added.";
-  } catch (err) {
-    Logger.log("Error in addTask: " + err.message);
-    throw new Error("Task submission failed: " + err.message);
-  }
-}
-
-/** Add new project */
-function addNewProject(project) {
-  try {
-    if (!project.name || !project.owner || !project.start) {
-      throw new Error("Project section incomplete. Please fill all required project fields.");
+    header {
+      background: #1976d2;
+      color: white;
+      padding: 15px;
+      text-align: center;
     }
-
-    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(PROJECTS_SHEET);
-
-    const cleanStart = new Date(project.start);
-    const cleanEnd = project.end ? new Date(project.end) : "";
-
-    const startDate = new Date(cleanStart.getFullYear(), cleanStart.getMonth(), cleanStart.getDate());
-    const endDate = cleanEnd ? new Date(cleanEnd.getFullYear(), cleanEnd.getMonth(), cleanEnd.getDate()) : "";
-
-    sheet.appendRow([
-      project.name.trim(),
-      startDate,
-      endDate,
-      project.owner.trim(),
-      project.status || "Active",
-      project.budget || "",
-      project.description || "",
-      new Date() // Timestamp in Column H
-    ]);
-    return "✅ Project added.";
-  } catch (err) {
-    Logger.log("Error in addNewProject: " + err.message);
-    throw new Error("Project submission failed: " + err.message);
-  }
-}
-
-/** Dashboard update logic */
-function updateDashboard() {
-  try {
-    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(DASHBOARD_SHEET);
-    const data = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TASKS_SHEET).getDataRange().getValues();
-    let active = 0, overdue = 0, completed = 0, today = new Date();
-    for (let i = 1; i < data.length; i++) {
-      const dueDate = new Date(data[i][4]);
-      const status = data[i][5];
-      if (status === "Completed") completed++;
-      else if (dueDate < today) overdue++;
-      else active++;
+    nav {
+      background: #e3e9f5;
+      padding: 10px;
+      text-align: center;
     }
-    sheet.getRange("B2").setValue(active);
-    sheet.getRange("B3").setValue(overdue);
-    sheet.getRange("B4").setValue(completed);
-    sheet.getRange("B6").setValue(new Date());
-    drawStatusChart();
-  } catch (err) {
-    Logger.log("Error in updateDashboard: " + err.message);
-    throw new Error("Dashboard update failed.");
-  }
-}
-
-/** Draws chart for dashboard */
-function drawStatusChart() {
-  try {
-    const dashboardSheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(DASHBOARD_SHEET);
-    const data = getChartData();
-    const range = dashboardSheet.getRange("D2:F" + (data.length + 1));
-    range.clearContent();
-    range.offset(0, 0, data.length, 3).setValues(data);
-    const chart = dashboardSheet.newChart()
-      .asColumnChart()
-      .addRange(range.offset(0, 0, data.length, 3))
-      .setPosition(1, 8, 0, 0)
-      .setOption("title", "Project Task Status")
-      .setOption("isStacked", true)
-      .setOption("legend", { position: "bottom" })
-      .setOption("colors", ["#f39c12", "#2ecc71"])
-      .build();
-    dashboardSheet.getCharts().forEach(c => dashboardSheet.removeChart(c));
-    dashboardSheet.insertChart(chart);
-  } catch (err) {
-    Logger.log("Error in drawStatusChart: " + err.message);
-    throw new Error("Chart generation failed.");
-  }
-}
-
-function getChartData() {
-  try {
-    const data = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TASKS_SHEET).getDataRange().getValues();
-    const map = {};
-    for (let i = 1; i < data.length; i++) {
-      const p = data[i][1], s = data[i][5];
-      if (!map[p]) map[p] = { Open: 0, Completed: 0 };
-      map[p][s] = (map[p][s] || 0) + 1;
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #1976d2;
+      font-weight: bold;
     }
-    return [["Project", "Open", "Completed"]].concat(Object.entries(map).map(([p, s]) => [p, s.Open || 0, s.Completed || 0]));
-  } catch (err) {
-    Logger.log("Error in getChartData: " + err.message);
-    throw new Error("Chart data generation failed.");
-  }
-}
+    form {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #145a9e;
+    }
+  </style>
+</head>
+<body>
+  <header>📁 Add Project</header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tasks.html">Submit Task</a>
+    <a href="projects.html">Add Project</a>
+  </nav>
 
-/** Auto-sync projects from tasks */
-function syncProjectsFromTasks() {
-  try {
-    const sheet = SpreadsheetApp.openById(SHEET_ID);
-    const tasks = sheet.getSheetByName(TASKS_SHEET).getDataRange().getValues();
-    const projectSheet = sheet.getSheetByName(PROJECTS_SHEET);
-    const existing = projectSheet.getRange(2, 1, projectSheet.getLastRow() - 1).getValues().flat();
-    const unique = [...new Set(tasks.slice(1).map(r => r[1]).filter(p => p))];
-    const rows = unique.filter(p => !existing.includes(p)).map(p => {
-      const match = tasks.find(r => r[1] === p);
-      return [p, match[0], "", match[3], "Active", "", match[7] || ""];
+  <form id="projectForm">
+    <label>Project Name</label>
+    <input type="text" name="name" required />
+
+    <label>Start Date</label>
+    <input type="date" name="start" required />
+
+    <label>End Date</label>
+    <input type="date" name="end" />
+
+    <label>Project Owner</label>
+    <input type="email" name="owner" required />
+
+    <label>Status</label>
+    <select name="status" required>
+      <option>Active</option>
+      <option>Pending</option>
+      <option>Completed</option>
+    </select>
+
+    <label>Budget</label>
+    <input type="number" name="budget" />
+
+    <label>Description</label>
+    <textarea name="description" rows="4"></textarea>
+
+    <button type="submit">Add Project</button>
+  </form>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec";
+    const form = document.getElementById("projectForm");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append("Project Name", form.elements["name"].value);
+      formData.append("Start Date", form.elements["start"].value);
+      formData.append("End Date", form.elements["end"].value);
+      formData.append("Project Owner", form.elements["owner"].value);
+      formData.append("Status", form.elements["status"].value);
+      formData.append("Budget", form.elements["budget"].value);
+      formData.append("Description", form.elements["description"].value);
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.text())
+      .then(data => {
+        alert("✅ Project submitted successfully!");
+        form.reset();
+      })
+      .catch(err => {
+        alert("❌ Error submitting project: " + err.message);
+      });
     });
-    if (rows.length) projectSheet.getRange(projectSheet.getLastRow() + 1, 1, rows.length, 7).setValues(rows);
-  } catch (err) {
-    Logger.log("Error in syncProjectsFromTasks: " + err.message);
-    throw new Error("Project sync failed.");
-  }
-}
-
-/** Notify owner via email */
-function sendTaskNotification(taskObj) {
-  try {
-    MailApp.sendEmail({
-      to: taskObj.owner,
-      subject: `📌 New Task: ${taskObj.task}`,
-      body: `Hello ${taskObj.owner},\n\nYou've received a task under *${taskObj.project}*:\n📋 ${taskObj.task}\n🗓 Due: ${taskObj.dueDate}\n🌟 Priority: ${taskObj.priority}\n📜 Notes: ${taskObj.notes}\n\n-- VisionFlow`
-    });
-  } catch (err) {
-    Logger.log("Error in sendTaskNotification: " + err.message);
-  }
-}
-
-/** Public API */
-function getVisionFlowData() {
-  try {
-    const data = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TASKS_SHEET).getDataRange().getValues();
-    const headers = data[0];
-    const tasks = data.slice(1).map(row => Object.fromEntries(headers.map((h, i) => [h, row[i]])));
-    return ContentService.createTextOutput(JSON.stringify(tasks)).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    Logger.log("Error in getVisionFlowData: " + err.message);
-    throw new Error("Failed to serve data.");
-  }
-}
-
-/** Gantt Timeline Data Provider */
-function getGanttData() {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(PROJECTS_SHEET);
-  const data = sheet.getDataRange().getValues();
-  const result = [["Project", "Task", "Start", "End"]];
-
-  for (let i = 1; i < data.length; i++) {
-    const name = data[i][0];
-    let start = data[i][1];
-    let end = data[i][2];
-
-    if (start instanceof Date && end instanceof Date) {
-      start = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-      end = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-      result.push([name, name, start, end]);
-    }
-  }
-
-  return result;
-}
-
-/** Updated doPost handler for both FormData and JSON */
-function doPost(e) {
-  try {
-    let project = null;
-
-    if (e.postData && e.postData.contents && e.postData.type === "application/json") {
-      const data = JSON.parse(e.postData.contents);
-      if (data.project) {
-        project = data.project;
-      }
-    } else if (e.parameter["Project Name"]) {
-      project = {
-        name: e.parameter["Project Name"],
-        start: e.parameter["Start Date"],
-        end: e.parameter["End Date"],
-        owner: e.parameter["Project Owner"],
-        status: e.parameter["Status"],
-        budget: e.parameter["Budget"],
-        description: e.parameter["Description"]
-      };
-    }
-
-    if (project) {
-      const result = addNewProject(project);
-      return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.TEXT);
-    } else {
-      return ContentService.createTextOutput("❌ Error: No valid project payload").setMimeType(ContentService.MimeType.TEXT);
-    }
-
-  } catch (err) {
-    return ContentService.createTextOutput("❌ Error: " + err.message).setMimeType(ContentService.MimeType.TEXT);
-  }
-}
+  </script>
+</body>
+</html>
 
 
