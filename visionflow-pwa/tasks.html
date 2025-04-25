@@ -93,9 +93,7 @@
 
   <form id="taskForm">
     <label>Project Name</label>
-    <select name="project" id="projectSelect" required>
-      <option>Loading...</option>
-    </select>
+    <input type="text" name="project" required />
 
     <label>Task Title</label>
     <input type="text" name="task" required />
@@ -132,34 +130,14 @@
 
   <script>
     const form = document.getElementById("taskForm");
-    const projectDropdown = document.getElementById("projectSelect");
     const messageBox = document.getElementById("message");
 
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxWKxyZbQg3z2Y2Z9jxo951_oaa6FYZcedraI96aVqB4Gjszz-RAeMWFjG0qqaCEZEM/exec";
-
-    // ✅ JSONP Project List
-    function loadProjects() {
-      const script = document.createElement("script");
-      script.src = scriptURL + "?page=projects&callback=populateProjects";
-      document.body.appendChild(script);
-    }
-
-    function populateProjects(projects) {
-      projectDropdown.innerHTML = "";
-      projects.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        projectDropdown.appendChild(option);
-      });
-    }
-
-    // 📨 Form submission
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       messageBox.style.display = "none";
 
       const formData = new FormData(form);
+      const scriptURL = "https://script.google.com/macros/s/AKfycbyqGAuy5RyltNwWgif-FCCltuvCrhBkmnOOFeloLFtW_lg1ACN8oDa4XaG68zHT3A1_/exec";
 
       try {
         const res = await fetch(scriptURL, {
@@ -168,17 +146,15 @@
         });
         const text = await res.text();
         messageBox.textContent = text;
-        messageBox.className = "success";
+        messageBox.className = text.includes("✅") ? "success" : "error";
         messageBox.style.display = "block";
-        form.reset();
+        if (text.includes("✅")) form.reset();
       } catch (err) {
         messageBox.textContent = "❌ Submission failed: " + err.message;
         messageBox.className = "error";
         messageBox.style.display = "block";
       }
     });
-
-    loadProjects();
   </script>
 </body>
 </html>
