@@ -7,29 +7,39 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f4f9ff;
+      background-color: #f5f9ff;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     header {
       background: #1976d2;
       color: white;
       padding: 15px;
       text-align: center;
-      font-size: 1.5rem;
+    }
+    nav {
+      background: #e3e9f5;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #1976d2;
+      font-weight: bold;
     }
     form {
-      background: white;
       max-width: 600px;
-      margin: 40px auto;
+      margin: 30px auto;
       padding: 20px;
+      background: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     label {
-      font-weight: bold;
-      margin-top: 15px;
       display: block;
+      margin-top: 15px;
+      font-weight: bold;
     }
     input, textarea, select {
       width: 100%;
@@ -37,27 +47,30 @@
       margin-top: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 14px;
     }
     button {
       margin-top: 20px;
-      padding: 12px;
-      width: 100%;
+      padding: 10px 25px;
       background-color: #1976d2;
       color: white;
       border: none;
       border-radius: 6px;
       font-size: 1rem;
-      font-weight: bold;
       cursor: pointer;
     }
     button:hover {
-      background-color: #125aaf;
+      background-color: #145a9e;
     }
   </style>
 </head>
 <body>
   <header>📁 Add Project</header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="tasks.html">Submit Task</a>
+    <a href="projects.html">Add Project</a>
+  </nav>
 
   <form id="projectForm">
     <label>Project Name</label>
@@ -74,17 +87,17 @@
 
     <label>Status</label>
     <select name="Status" required>
-      <option value="Active">✅ Active</option>
-      <option value="Planning">🧠 Planning</option>
-      <option value="Paused">⏸️ Paused</option>
-      <option value="Completed">🏁 Completed</option>
+      <option>Active</option>
+      <option>Planning</option>
+      <option>Completed</option>
+      <option>Paused</option>
     </select>
 
     <label>Budget</label>
     <input type="number" name="Budget" placeholder="ZAR" />
 
     <label>Description</label>
-    <textarea name="Description" rows="4" placeholder="Brief overview of the project..."></textarea>
+    <textarea name="Description" rows="4" placeholder="Brief description of the project..."></textarea>
 
     <button type="submit">➕ Add Project</button>
   </form>
@@ -95,19 +108,20 @@
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
+
       const formData = new FormData(form);
 
       fetch(scriptURL, {
         method: "POST",
-        body: formData
+        body: formData,
       })
-      .then(res => res.text())
+      .then(response => response.text())
       .then(data => {
-        alert(data || "✅ Project submitted successfully!");
+        alert("✅ " + data);
         form.reset();
       })
-      .catch(err => {
-        alert("❌ Submission failed: " + err.message);
+      .catch(error => {
+        alert("❌ Submission failed: " + error.message);
       });
     });
   </script>
