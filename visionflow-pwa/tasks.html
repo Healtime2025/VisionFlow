@@ -72,7 +72,7 @@
     <a href="projects.html">Add Project</a>
   </nav>
 
-  <form id="taskForm">
+  <form action="https://script.google.com/macros/s/AKfycbwdAwwRqQtCi35m5O69jy0URFl-RixOnNoegk-4V6r73HaphsNQs5rPwNiFvF4li05u/exec" method="POST">
     <label>Project Name</label>
     <input type="text" name="project" required />
 
@@ -104,31 +104,7 @@
     <label>Notes</label>
     <textarea name="notes" rows="4" placeholder="Instructions, reminders, context..."></textarea>
 
-    <button type="submit">Add Task</button>
+    <button type="submit">➕ Add Task</button>
   </form>
-
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwdAwwRqQtCi35m5O69jy0URFl-RixOnNoegk-4V6r73HaphsNQs5rPwNiFvF4li05u/exec";
-    const form = document.getElementById("taskForm");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-
-      fetch(scriptURL, {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.text())
-      .then(data => {
-        alert(data || "✅ Task submitted successfully!");
-        form.reset();
-      })
-      .catch(err => {
-        alert("❌ Error submitting task: " + err.message);
-      });
-    });
-  </script>
 </body>
 </html>
