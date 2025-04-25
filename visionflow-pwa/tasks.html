@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Project – VisionFlow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Task – VisionFlow</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -64,7 +64,7 @@
   </style>
 </head>
 <body>
-  <header>📁 Add Project</header>
+  <header>📋 Submit Task</header>
   <nav>
     <a href="index.html">Home</a>
     <a href="dashboard.html">Dashboard</a>
@@ -72,39 +72,44 @@
     <a href="projects.html">Add Project</a>
   </nav>
 
-  <form id="projectForm">
+  <form id="taskForm">
     <label>Project Name</label>
-    <input type="text" name="Project Name" required />
+    <input type="text" name="project" required />
 
-    <label>Start Date</label>
-    <input type="date" name="Start Date" required />
+    <label>Task Title</label>
+    <input type="text" name="task" required />
 
-    <label>End Date</label>
-    <input type="date" name="End Date" />
+    <label>Task Owner Email</label>
+    <input type="email" name="owner" required />
 
-    <label>Project Owner</label>
-    <input type="email" name="Project Owner" required />
+    <label>Due Date</label>
+    <input type="date" name="dueDate" required />
 
-    <label>Status</label>
-    <select name="Status" required>
-      <option>Active</option>
-      <option>Planning</option>
-      <option>Completed</option>
-      <option>Paused</option>
+    <label>Priority</label>
+    <select name="priority">
+      <option value="High">🔥 High</option>
+      <option value="Normal" selected>🔵 Normal</option>
+      <option value="Low">🌿 Low</option>
     </select>
 
-    <label>Budget</label>
-    <input type="number" name="Budget" placeholder="ZAR" />
+    <label>Task Type</label>
+    <select name="type">
+      <option value="General">📦 General</option>
+      <option value="Site">🏗️ Site</option>
+      <option value="Client">👤 Client</option>
+      <option value="Logistics">🚚 Logistics</option>
+      <option value="Quote">📝 Quote</option>
+    </select>
 
-    <label>Description</label>
-    <textarea name="Description" rows="4" placeholder="Brief description of the project..."></textarea>
+    <label>Notes</label>
+    <textarea name="notes" rows="4" placeholder="Instructions, reminders, context..."></textarea>
 
-    <button type="submit">Add Project</button>
+    <button type="submit">Add Task</button>
   </form>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzq2i8CTcZA1wGG7JlTUQaDmWt6vlIqIRP4stdMdd-fv9ZRILV9aNAY-8m-VYouxXIY/exec";
-    const form = document.getElementById("projectForm");
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwdAwwRqQtCi35m5O69jy0URFl-RixOnNoegk-4V6r73HaphsNQs5rPwNiFvF4li05u/exec";
+    const form = document.getElementById("taskForm");
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -115,13 +120,13 @@
         method: "POST",
         body: formData
       })
-      .then(response => response.text())
+      .then(res => res.text())
       .then(data => {
-        alert("✅ " + data);
+        alert(data || "✅ Task submitted successfully!");
         form.reset();
       })
-      .catch(error => {
-        alert("❌ Submission failed: " + error.message);
+      .catch(err => {
+        alert("❌ Error submitting task: " + err.message);
       });
     });
   </script>
