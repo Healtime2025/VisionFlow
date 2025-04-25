@@ -108,19 +108,20 @@
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
+
       const formData = new FormData(form);
 
       fetch(scriptURL, {
         method: "POST",
         body: formData
       })
-      .then(res => res.text())
+      .then(response => response.text())
       .then(data => {
         alert("✅ Project submitted successfully!");
         form.reset();
       })
-      .catch(err => {
-        alert("❌ Error submitting project: " + err.message);
+      .catch(error => {
+        alert("❌ Submission failed: " + error.message);
       });
     });
   </script>
