@@ -61,6 +61,25 @@
     button:hover {
       background-color: #145a9e;
     }
+    #message {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+    .success {
+      background-color: #e0f5e9;
+      color: #2e7d32;
+      border: 1px solid #81c784;
+    }
+    .error {
+      background-color: #fdecea;
+      color: #d32f2f;
+      border: 1px solid #f44336;
+    }
   </style>
 </head>
 <body>
@@ -72,7 +91,7 @@
     <a href="projects.html">Add Project</a>
   </nav>
 
-  <form action="https://script.google.com/macros/s/AKfycbwdAwwRqQtCi35m5O69jy0URFl-RixOnNoegk-4V6r73HaphsNQs5rPwNiFvF4li05u/exec" method="POST">
+  <form id="taskForm">
     <label>Project Name</label>
     <input type="text" name="project" required />
 
@@ -106,5 +125,36 @@
 
     <button type="submit">➕ Add Task</button>
   </form>
+
+  <div id="message"></div>
+
+  <script>
+    const form = document.getElementById("taskForm");
+    const messageBox = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      messageBox.style.display = "none";
+
+      const formData = new FormData(form);
+      const scriptURL = "https://script.google.com/macros/s/AKfycbwdAwwRqQtCi35m5O69jy0URFl-RixOnNoegk-4V6r73HaphsNQs5rPwNiFvF4li05u/exec";
+
+      try {
+        const res = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+        const text = await res.text();
+        messageBox.textContent = text;
+        messageBox.className = "success";
+        messageBox.style.display = "block";
+        form.reset();
+      } catch (err) {
+        messageBox.textContent = "❌ Submission failed: " + err.message;
+        messageBox.className = "error";
+        messageBox.style.display = "block";
+      }
+    });
+  </script>
 </body>
 </html>
