@@ -73,7 +73,7 @@
   </nav>
 
   <form id="taskForm">
-    <label>Select Project</label>
+    <label>Project Name</label>
     <input type="text" name="project" required />
 
     <label>Task Name</label>
@@ -115,26 +115,21 @@
       e.preventDefault();
 
       const formData = new FormData(form);
-      const taskPayload = {
-        task: Object.fromEntries(formData.entries())
-      };
 
       fetch(scriptURL, {
         method: "POST",
-        body: JSON.stringify(taskPayload),
-        headers: {
-          "Content-Type": "application/json"
-        }
+        body: formData
       })
-      .then(res => res.text())
+      .then(response => response.text())
       .then(data => {
         alert(data || "✅ Task submitted successfully!");
         form.reset();
       })
-      .catch(err => {
-        alert("❌ Error submitting task: " + err.message);
+      .catch(error => {
+        alert("❌ Error submitting task: " + error.message);
       });
     });
   </script>
 </body>
 </html>
+
