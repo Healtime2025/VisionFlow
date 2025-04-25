@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Project – VisionFlow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Task – VisionFlow</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -61,10 +61,29 @@
     button:hover {
       background-color: #145a9e;
     }
+    #message {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+    .success {
+      background-color: #e0f5e9;
+      color: #2e7d32;
+      border: 1px solid #81c784;
+    }
+    .error {
+      background-color: #fdecea;
+      color: #d32f2f;
+      border: 1px solid #f44336;
+    }
   </style>
 </head>
 <body>
-  <header>📁 Add Project</header>
+  <header>📋 Submit Task</header>
   <nav>
     <a href="index.html">Home</a>
     <a href="dashboard.html">Dashboard</a>
@@ -72,57 +91,69 @@
     <a href="projects.html">Add Project</a>
   </nav>
 
-  <form id="projectForm">
+  <form id="taskForm">
     <label>Project Name</label>
-    <input type="text" name="Project Name" required />
+    <input type="text" name="project" placeholder="e.g. MetastoreX" required />
 
-    <label>Start Date</label>
-    <input type="date" name="Start Date" required />
+    <label>Task Title</label>
+    <input type="text" name="task" required />
 
-    <label>End Date</label>
-    <input type="date" name="End Date" />
+    <label>Task Owner Email</label>
+    <input type="email" name="owner" required />
 
-    <label>Project Owner</label>
-    <input type="email" name="Project Owner" required />
+    <label>Due Date</label>
+    <input type="date" name="dueDate" required />
 
-    <label>Status</label>
-    <select name="Status" required>
-      <option value="Active">Active</option>
-      <option value="Planning">Planning</option>
-      <option value="Completed">Completed</option>
-      <option value="Paused">Paused</option>
+    <label>Priority</label>
+    <select name="priority">
+      <option value="High">🔥 High</option>
+      <option value="Normal" selected>🔵 Normal</option>
+      <option value="Low">🌿 Low</option>
     </select>
 
-    <label>Budget</label>
-    <input type="number" name="Budget" placeholder="ZAR" />
+    <label>Task Type</label>
+    <select name="type">
+      <option value="General">📦 General</option>
+      <option value="Site">🏗️ Site</option>
+      <option value="Client">👤 Client</option>
+      <option value="Logistics">🚚 Logistics</option>
+      <option value="Quote">📝 Quote</option>
+    </select>
 
-    <label>Description</label>
-    <textarea name="Description" rows="4" placeholder="Brief description of the project..."></textarea>
+    <label>Notes</label>
+    <textarea name="notes" rows="4" placeholder="Instructions, reminders, context..."></textarea>
 
-    <button type="submit">➕ Add Project</button>
+    <button type="submit">➕ Add Task</button>
   </form>
 
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxWKxyZbQg3z2Y2Z9jxo951_oaa6FYZcedraI96aVqB4Gjszz-RAeMWFjG0qqaCEZEM/exec";
-    const form = document.getElementById("projectForm");
+  <div id="message"></div>
 
-    form.addEventListener("submit", (e) => {
+  <script>
+    const form = document.getElementById("taskForm");
+    const messageBox = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      messageBox.style.display = "none";
 
       const formData = new FormData(form);
+      const scriptURL = "https://script.google.com/macros/s/AKfycbyqGAuy5RyltNwWgif-FCCltuvCrhBkmnOOFeloLFtW_lg1ACN8oDa4XaG68zHT3A1_/exec"; // Update with your deployed URL
 
-      fetch(scriptURL, {
-        method: "POST",
-        body: formData
-      })
-      .then(response => response.text())
-      .then(data => {
-        alert("✅ " + data);
-        form.reset();
-      })
-      .catch(error => {
-        alert("❌ Submission failed: " + error.message);
-      });
+      try {
+        const res = await fetch(scriptURL, {
+          method: "POST",
+          body: formData
+        });
+        const text = await res.text();
+        messageBox.textContent = text;
+        messageBox.className = text.includes("✅") ? "success" : "error";
+        messageBox.style.display = "block";
+        if (text.includes("✅")) form.reset();
+      } catch (err) {
+        messageBox.textContent = "❌ Submission failed: " + err.message;
+        messageBox.className = "error";
+        messageBox.style.display = "block";
+      }
     });
   </script>
 </body>
