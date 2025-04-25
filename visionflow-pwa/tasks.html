@@ -93,8 +93,8 @@
 
   <form id="taskForm">
     <label>Project Name</label>
-    <select name="project" id="project" required>
-      <option value="">Loading projects...</option>
+    <select name="project" id="projectSelect" required>
+      <option>Loading...</option>
     </select>
 
     <label>Task Title</label>
@@ -132,25 +132,29 @@
 
   <script>
     const form = document.getElementById("taskForm");
+    const projectDropdown = document.getElementById("projectSelect");
     const messageBox = document.getElementById("message");
 
-    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbyqGAuy5RyltNwWgif-FCCltuvCrhBkmnOOFeloLFtW_lg1ACN8oDa4XaG68zHT3A1_/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyqGAuy5RyltNwWgif-FCCltuvCrhBkmnOOFeloLFtW_lg1ACN8oDa4XaG68zHT3A1_/exec";
 
-    // Load projects into dropdown
-    async function loadProjects() {
-      try {
-        const res = await fetch(scriptBaseURL + "?page=projects");
-        const projects = await res.json();
-        const dropdown = document.getElementById("project");
-        dropdown.innerHTML = '<option value="">Select Project</option>';
-        projects.forEach(p => {
-          dropdown.innerHTML += `<option value="${p}">${p}</option>`;
-        });
-      } catch (err) {
-        console.error("Failed to load projects: ", err.message);
-      }
+    // ✅ JSONP Project List
+    function loadProjects() {
+      const script = document.createElement("script");
+      script.src = scriptURL + "?page=projects&callback=populateProjects";
+      document.body.appendChild(script);
     }
 
+    function populateProjects(projects) {
+      projectDropdown.innerHTML = "";
+      projects.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        projectDropdown.appendChild(option);
+      });
+    }
+
+    // 📨 Form submission
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       messageBox.style.display = "none";
@@ -158,7 +162,7 @@
       const formData = new FormData(form);
 
       try {
-        const res = await fetch(scriptBaseURL, {
+        const res = await fetch(scriptURL, {
           method: "POST",
           body: formData
         });
@@ -174,7 +178,7 @@
       }
     });
 
-    window.onload = loadProjects;
+    loadProjects();
   </script>
 </body>
 </html>
