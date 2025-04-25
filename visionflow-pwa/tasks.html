@@ -93,7 +93,7 @@
 
   <form id="taskForm">
     <label>Project Name</label>
-    <input type="text" name="project" placeholder="Enter Project Name" required />
+    <input type="text" name="project" required />
 
     <label>Task Title</label>
     <input type="text" name="task" required />
@@ -131,13 +131,13 @@
   <script>
     const form = document.getElementById("taskForm");
     const messageBox = document.getElementById("message");
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxWKxyZbQg3z2Y2Z9jxo951_oaa6FYZcedraI96aVqB4Gjszz-RAeMWFjG0qqaCEZEM/exec";
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       messageBox.style.display = "none";
 
       const formData = new FormData(form);
+      const scriptURL = "https://script.google.com/macros/sAKfycbxNzG3uwGGI9VVakDIdO6_cWE6mYDyTOmQv677uVir4Vb5PD7QnEfs3iDW1BeWt8v8/exec";
 
       try {
         const res = await fetch(scriptURL, {
