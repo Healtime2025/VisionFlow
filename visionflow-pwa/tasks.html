@@ -72,32 +72,38 @@
   </nav>
 
   <form id="taskForm">
-    <label>Project Name</label>
-    <input type="text" name="Project Name" required />
+    <label>Select Project</label>
+    <input type="text" name="project" required />
 
-    <label>Start Date</label>
-    <input type="date" name="Start Date" required />
+    <label>Task Name</label>
+    <input type="text" name="task" required />
 
-    <label>End Date</label>
-    <input type="date" name="End Date" required />
+    <label>Task Owner Email</label>
+    <input type="email" name="owner" required />
 
-    <label>Project Owner</label>
-    <input type="email" name="Project Owner" required />
+    <label>Due Date</label>
+    <input type="date" name="dueDate" required />
 
-    <label>Status</label>
-    <select name="Status" required>
-      <option>Active</option>
-      <option>Pending</option>
-      <option>Completed</option>
+    <label>Priority</label>
+    <select name="priority" required>
+      <option value="High">🔥 High</option>
+      <option value="Normal" selected>🔵 Normal</option>
+      <option value="Low">🌿 Low</option>
     </select>
 
-    <label>Budget</label>
-    <input type="number" name="Budget" />
+    <label>Task Type</label>
+    <select name="type" required>
+      <option value="General">📦 General</option>
+      <option value="Site">🏗️ Site</option>
+      <option value="Client">👤 Client</option>
+      <option value="Logistics">🚚 Logistics</option>
+      <option value="Quote">📝 Quote</option>
+    </select>
 
-    <label>Description</label>
-    <textarea name="Description" rows="4"></textarea>
+    <label>Notes</label>
+    <textarea name="notes" rows="4"></textarea>
 
-    <button type="submit">Submit</button>
+    <button type="submit">Add Task</button>
   </form>
 
   <script>
@@ -106,15 +112,30 @@
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      fetch(scriptURL, { method: "POST", body: new FormData(form) })
-        .then(response => {
-          alert("✅ Task submitted successfully!");
-          form.reset();
-        })
-        .catch(error => {
-          alert("❌ Submission failed: " + error.message);
-        });
+      const formData = new FormData(form);
+
+      // Wrap task object to match Apps Script doPost structure
+      const taskPayload = {
+        task: Object.fromEntries(formData.entries())
+      };
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify(taskPayload),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.text())
+      .then(data => {
+        alert("✅ Task submitted successfully!");
+        form.reset();
+      })
+      .catch(err => {
+        alert("❌ Error submitting task: " + err.message);
+      });
     });
   </script>
 </body>
 </html>
+
