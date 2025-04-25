@@ -61,38 +61,24 @@
     button:hover {
       background-color: #145a9e;
     }
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #4caf50;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
+    #message {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      border-radius: 6px;
       font-weight: bold;
+      text-align: center;
       display: none;
-      z-index: 999;
     }
-    .toast.error {
-      background: #f44336;
+    .success {
+      background-color: #e0f5e9;
+      color: #2e7d32;
+      border: 1px solid #81c784;
     }
-    #loader {
-      display: none;
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #1976d2;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      z-index: 1000;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .error {
+      background-color: #fdecea;
+      color: #d32f2f;
+      border: 1px solid #f44336;
     }
   </style>
 </head>
@@ -107,8 +93,8 @@
 
   <form id="taskForm">
     <label>Project Name</label>
-    <select name="project" id="projectDropdown" required>
-      <option value="">Loading Projects...</option>
+    <select name="project" required>
+      <option disabled selected>Loading projects...</option>
     </select>
 
     <label>Task Title</label>
@@ -142,34 +128,36 @@
     <button type="submit">➕ Add Task</button>
   </form>
 
-  <div class="toast" id="toast"></div>
-  <div id="loader"></div>
+  <div id="message"></div>
 
   <script>
     const form = document.getElementById("taskForm");
-    const toast = document.getElementById("toast");
-    const loader = document.getElementById("loader");
-    const projectDropdown = document.getElementById("projectDropdown");
+    const messageBox = document.getElementById("message");
+    const dropdown = form.querySelector("select[name='project']");
 
     const scriptURL = "https://script.google.com/macros/s/AKfycbyqGAuy5RyltNwWgif-FCCltuvCrhBkmnOOFeloLFtW_lg1ACN8oDa4XaG68zHT3A1_/exec";
-    const projectsAPI = "https://script.google.com/macros/s/AKfycbyqGAuy5RyltNwWgif-FCCltuvCrhBkmnOOFeloLFtW_lg1ACN8oDa4XaG68zHT3A1_/exec?page=projects";
+    const projectsAPI = scriptURL + "?page=projects";
 
-    // Load live project list
+    // Load project names into dropdown
     fetch(projectsAPI)
-      .then(response => response.json())
-      .then(data => {
-        projectDropdown.innerHTML = '<option value="">Select Project</option>';
-        data.forEach(project => {
-          projectDropdown.innerHTML += `<option value="${project}">${project}</option>`;
+      .then(res => res.json())
+      .then(projects => {
+        dropdown.innerHTML = ""; // Clear placeholder
+        projects.forEach(name => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          dropdown.appendChild(option);
         });
       })
       .catch(err => {
-        projectDropdown.innerHTML = '<option value="">Failed to load projects</option>';
+        console.error("Failed to load projects:", err);
+        dropdown.innerHTML = `<option>Failed to load projects</option>`;
       });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      loader.style.display = "block";
+      messageBox.style.display = "none";
 
       const formData = new FormData(form);
 
@@ -179,21 +167,16 @@
           body: formData
         });
         const text = await res.text();
-        showToast(text, false);
+        messageBox.textContent = text;
+        messageBox.className = "success";
+        messageBox.style.display = "block";
         form.reset();
       } catch (err) {
-        showToast("❌ Submission failed: " + err.message, true);
-      } finally {
-        loader.style.display = "none";
+        messageBox.textContent = "❌ Submission failed: " + err.message;
+        messageBox.className = "error";
+        messageBox.style.display = "block";
       }
     });
-
-    function showToast(message, isError) {
-      toast.textContent = message;
-      toast.className = isError ? "toast error" : "toast";
-      toast.style.display = "block";
-      setTimeout(() => { toast.style.display = "none"; }, 3000);
-    }
   </script>
 </body>
 </html>
