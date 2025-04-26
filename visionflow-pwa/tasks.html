@@ -93,13 +93,13 @@
 
   <form id="taskForm">
     <label>Project Name</label>
-    <input type="text" name="project" required />
+    <input type="text" name="project" required placeholder="Type project name manually" />
 
     <label>Task Title</label>
-    <input type="text" name="task" required />
+    <input type="text" name="task" required placeholder="Type task title" />
 
     <label>Task Owner Email</label>
-    <input type="email" name="owner" required />
+    <input type="email" name="owner" required placeholder="Enter email address" />
 
     <label>Due Date</label>
     <input type="date" name="dueDate" required />
@@ -137,7 +137,7 @@
       messageBox.style.display = "none";
 
       const formData = new FormData(form);
-      const scriptURL = "https://script.google.com/macros/sAKfycbxNzG3uwGGI9VVakDIdO6_cWE6mYDyTOmQv677uVir4Vb5PD7QnEfs3iDW1BeWt8v8/exec";
+      const scriptURL = "https://script.google.com/macros/s/AKfycbxNzG3uwGGI9VVakDIdO6_cWE6mYDyTOmQv677uVir4Vb5PD7QnEfs3iDW1BeWt8v8/exec"; // Correct endpoint for your system
 
       try {
         const res = await fetch(scriptURL, {
@@ -158,4 +158,3 @@
   </script>
 </body>
 </html>
-
