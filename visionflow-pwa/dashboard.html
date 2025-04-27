@@ -13,6 +13,7 @@
       margin: 0;
       padding: 0;
       text-align: center;
+      transition: background-color 0.3s, color 0.3s;
     }
     header {
       background-color: #1976d2;
@@ -32,6 +33,21 @@
       text-decoration: none;
       color: #1976d2;
       font-weight: bold;
+    }
+    .snapshot {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px auto;
+      gap: 20px;
+    }
+    .card {
+      background: #1976d2;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
     .table-container {
       width: 95%;
@@ -62,7 +78,7 @@
     #successMessage, #newItemBanner {
       display: none;
       max-width: 600px;
-      margin: 20px auto;
+      margin: 15px auto;
       padding: 10px;
       font-weight: bold;
       border-radius: 8px;
@@ -78,6 +94,42 @@
       color: #000;
       border: 2px dashed #fbc02d;
     }
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    .dark-mode nav {
+      background: #333;
+    }
+    .dark-mode nav a {
+      color: #90caf9;
+    }
+    .dark-mode .card {
+      background: #333;
+      color: #90caf9;
+    }
+    .dark-mode .table-container {
+      background: #1e1e1e;
+    }
+    .dark-mode table {
+      color: #e0e0e0;
+    }
+    .dark-mode th {
+      background-color: #444;
+      color: #90caf9;
+    }
+    #darkToggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
     @media (max-width: 600px) {
       header {
         font-size: 1.2rem;
@@ -87,6 +139,9 @@
       }
       nav a {
         margin: 5px 0;
+      }
+      .snapshot {
+        flex-direction: column;
       }
       table, th, td {
         font-size: 0.9rem;
@@ -108,7 +163,16 @@
   <a href="projects.html">Add Project</a>
 </nav>
 
-<!-- Success and New Item Banners -->
+<!-- Dark mode toggle -->
+<button id="darkToggle">🌙 Toggle Dark Mode</button>
+
+<!-- Snapshot counters -->
+<div class="snapshot" id="snapshot">
+  <div class="card" id="projectsCount">Projects: ...</div>
+  <div class="card" id="tasksCount">Tasks: ...</div>
+</div>
+
+<!-- Banners -->
 <div id="successMessage">✅ Last submission successful!</div>
 <div id="newItemBanner">🚨 New Item Added!</div>
 
@@ -160,17 +224,17 @@
     chart.draw(data, options);
   }
 
-  // Auto-refresh every 5 minutes (300,000 milliseconds)
+  // Auto-refresh every 5 minutes
   setTimeout(() => {
     location.reload();
   }, 300000);
 
-  // Show success message if redirected with ?success=true
+  // Success banner after submission
   if (window.location.search.includes("success=true")) {
     document.getElementById('successMessage').style.display = 'block';
   }
 
-  // New Item Flashing Banner Logic
+  // New Item Flashing Banner
   window.addEventListener('load', () => {
     const lastSeen = localStorage.getItem('lastSeenSubmission') || 0;
     const now = new Date().getTime();
@@ -188,7 +252,23 @@
       }
     }
   });
+
+  // Snapshot Counts Fetcher
+  fetch('https://script.google.com/macros/s/AKfycbxyCXzn1A5vfi0LhsqaCRTBwiUxN-zB6iWGauzC0z1Gz_m9XZdw33cPC70bQpWBeqXN/exec?getCounts')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('projectsCount').innerText = "Projects: " + (data.projects || 0);
+      document.getElementById('tasksCount').innerText = "Tasks: " + (data.tasks || 0);
+    })
+    .catch(err => console.error('Failed to load snapshot:', err));
+
+  // Dark Mode Toggle
+  const darkButton = document.getElementById('darkToggle');
+  darkButton.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+  });
 </script>
 
 </body>
 </html>
+
