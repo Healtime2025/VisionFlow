@@ -18,23 +18,33 @@
       background-color: #1976d2;
       color: white;
       padding: 15px;
+      font-size: 1.5rem;
     }
     nav {
       background: #e3e9f5;
       padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     nav a {
-      margin: 0 15px;
+      margin: 5px 10px;
       text-decoration: none;
       color: #1976d2;
       font-weight: bold;
     }
-    table {
-      width: 90%;
+    .table-container {
+      width: 95%;
+      overflow-x: auto;
       margin: 20px auto;
-      border-collapse: collapse;
       background: white;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
     }
     th, td {
       border: 1px solid #ddd;
@@ -45,15 +55,31 @@
       color: white;
     }
     #chart_div {
-      width: 80%;
+      width: 90%;
+      max-width: 600px;
       margin: 30px auto;
+    }
+    @media (max-width: 600px) {
+      header {
+        font-size: 1.2rem;
+      }
+      nav {
+        flex-direction: column;
+      }
+      nav a {
+        margin: 5px 0;
+      }
+      table, th, td {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>📊 VisionFlow Dashboard</h1>
+  <img src="icon-192.png" alt="Logo" style="height: 30px; vertical-align: middle; margin-right: 10px;">
+  VisionFlow Dashboard
 </header>
 
 <nav>
@@ -65,23 +91,25 @@
 
 <h2>📋 Active Projects Overview</h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>Project Name</th>
-      <th>Start Date</th>
-      <th>End Date</th>
-      <th>Owner</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td>Rekorda</td><td>15/4/2025</td><td>8/5/2025</td><td>smoriti@gmail.com</td><td>Active</td></tr>
-    <tr><td>Vision Flow</td><td>15/4/2026</td><td>8/6/2025</td><td>smoriti@gmail.com</td><td>Active</td></tr>
-    <tr><td>MedIntelix</td><td>15/4/2027</td><td>8/7/2025</td><td>Dave</td><td>Active</td></tr>
-    <tr><td>EduCycle</td><td>15/4/2030</td><td>8/10/2025</td><td>smoriti@gmail.com</td><td>Active</td></tr>
-  </tbody>
-</table>
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Project Name</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Owner</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Rekorda</td><td>15/4/2025</td><td>8/5/2025</td><td>smoriti@gmail.com</td><td>Active</td></tr>
+      <tr><td>Vision Flow</td><td>15/4/2026</td><td>8/6/2025</td><td>smoriti@gmail.com</td><td>Active</td></tr>
+      <tr><td>MedIntelix</td><td>15/4/2027</td><td>8/7/2025</td><td>Dave</td><td>Active</td></tr>
+      <tr><td>EduCycle</td><td>15/4/2030</td><td>8/10/2025</td><td>smoriti@gmail.com</td><td>Active</td></tr>
+    </tbody>
+  </table>
+</div>
 
 <div id="chart_div"></div>
 
@@ -101,6 +129,8 @@
       title: 'Project Status Overview',
       pieHole: 0.4,
       colors: ['#1976d2', '#f4b400', '#db4437'],
+      chartArea: {width: '80%', height: '70%'},
+      legend: {position: 'bottom'}
     };
 
     var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
