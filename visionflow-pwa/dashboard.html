@@ -59,6 +59,25 @@
       max-width: 600px;
       margin: 30px auto;
     }
+    #successMessage, #newItemBanner {
+      display: none;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      font-weight: bold;
+      border-radius: 8px;
+      text-align: center;
+    }
+    #successMessage {
+      background-color: #e0f5e9;
+      color: #2e7d32;
+      border: 1px solid #81c784;
+    }
+    #newItemBanner {
+      background-color: #ffeb3b;
+      color: #000;
+      border: 2px dashed #fbc02d;
+    }
     @media (max-width: 600px) {
       header {
         font-size: 1.2rem;
@@ -88,6 +107,10 @@
   <a href="tasks.html">Submit Task</a>
   <a href="projects.html">Add Project</a>
 </nav>
+
+<!-- Success and New Item Banners -->
+<div id="successMessage">✅ Last submission successful!</div>
+<div id="newItemBanner">🚨 New Item Added!</div>
 
 <h2>📋 Active Projects Overview</h2>
 
@@ -136,6 +159,35 @@
     var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
     chart.draw(data, options);
   }
+
+  // Auto-refresh every 5 minutes (300,000 milliseconds)
+  setTimeout(() => {
+    location.reload();
+  }, 300000);
+
+  // Show success message if redirected with ?success=true
+  if (window.location.search.includes("success=true")) {
+    document.getElementById('successMessage').style.display = 'block';
+  }
+
+  // New Item Flashing Banner Logic
+  window.addEventListener('load', () => {
+    const lastSeen = localStorage.getItem('lastSeenSubmission') || 0;
+    const now = new Date().getTime();
+    const fiveMinutesAgo = now - (5 * 60 * 1000);
+
+    if (parseInt(lastSeen) < fiveMinutesAgo) {
+      localStorage.setItem('lastSeenSubmission', now);
+    } else {
+      const banner = document.getElementById('newItemBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        setTimeout(() => {
+          banner.style.display = 'none';
+        }, 10000);
+      }
+    }
+  });
 </script>
 
 </body>
