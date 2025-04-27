@@ -163,16 +163,13 @@
   <a href="projects.html">Add Project</a>
 </nav>
 
-<!-- Dark mode toggle -->
 <button id="darkToggle">🌙 Toggle Dark Mode</button>
 
-<!-- Snapshot counters -->
 <div class="snapshot" id="snapshot">
   <div class="card" id="projectsCount">Projects: ...</div>
   <div class="card" id="tasksCount">Tasks: ...</div>
 </div>
 
-<!-- Banners -->
 <div id="successMessage">✅ Last submission successful!</div>
 <div id="newItemBanner">🚨 New Item Added!</div>
 
@@ -229,12 +226,12 @@
     location.reload();
   }, 300000);
 
-  // Success banner after submission
+  // Success banner
   if (window.location.search.includes("success=true")) {
     document.getElementById('successMessage').style.display = 'block';
   }
 
-  // New Item Flashing Banner
+  // New Item Banner Logic
   window.addEventListener('load', () => {
     const lastSeen = localStorage.getItem('lastSeenSubmission') || 0;
     const now = new Date().getTime();
@@ -251,9 +248,25 @@
         }, 10000);
       }
     }
+
+    // 🟩🟨🟥 Apply Row Colors based on status
+    const rows = document.querySelectorAll(".table-container tbody tr");
+    rows.forEach(row => {
+      const statusCell = row.querySelector("td:last-child");
+      if (statusCell) {
+        const status = statusCell.textContent.trim().toLowerCase();
+        if (status === "active") {
+          row.style.backgroundColor = "#e0f7e9"; // Light Green
+        } else if (status === "planning") {
+          row.style.backgroundColor = "#fff8e1"; // Light Yellow
+        } else if (status === "paused") {
+          row.style.backgroundColor = "#ffebee"; // Light Red
+        }
+      }
+    });
   });
 
-  // Snapshot Counts Fetcher
+  // Snapshot Counts
   fetch('https://script.google.com/macros/s/AKfycbxyCXzn1A5vfi0LhsqaCRTBwiUxN-zB6iWGauzC0z1Gz_m9XZdw33cPC70bQpWBeqXN/exec?getCounts')
     .then(res => res.json())
     .then(data => {
@@ -271,4 +284,3 @@
 
 </body>
 </html>
-
